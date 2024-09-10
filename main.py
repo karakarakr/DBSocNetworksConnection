@@ -5,6 +5,7 @@ from sqlalchemy.future import select
 from models.Models import TaskAdd, UserAdd, UserLogin, TaskUpdate
 from models.DBModels import User, Task, Base, Telegram, Instagram, Facebook
 from datetime import datetime, timedelta, timezone
+from sqlalchemy.engine import URL
 import bcrypt
 import re
 import secrets
@@ -18,15 +19,27 @@ app = FastAPI()
 SECRET_KEY = secrets.token_hex(32)
 ALGORITHM = "HS256"
 
-# Create async engine to connect to postgresql db
+# Формируем URL для подключения
+db_url = URL.create(
+    drivername="postgresql+asyncpg",
+    username="testuser",
+    password="testpass",
+    host="localhost",
+    port=5432,
+    database="testdb"
+)
+
+# Создаем асинхронный движок для подключения к PostgreSQL
 engine = create_async_engine(
-    'postgresql+asyncpg://postgres:123@localhost/postgres',
+    db_url,
     echo=True
 )
 
-# Create AsyncSession
+# Создаем AsyncSession
 AsyncSessionLocal = sessionmaker(
-    bind=engine, class_=AsyncSession, expire_on_commit=False
+    bind=engine,
+    class_=AsyncSession,
+    expire_on_commit=False
 )
 
 # Create all tables in the database
@@ -268,3 +281,62 @@ async def DeleteTaskByID(task_id: int, current_user: User = Depends(get_current_
 
     return {"message": "Task deleted"}
 
+
+
+#TODO its file must will be app.py in directory app, and then in main u write this code
+# import uvicorn
+# from app import app
+
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+# Just initialize all from your modules and else
+
+
+#TODO its code form app.py
+# from fastapi import FastAPI, HTTPException, Depends, Header
+# from sqlalchemy.future import select
+# from services.auth_service import create_access_token, verify_token, get_current_user
+# from services.task_service import (
+#     GetAllTasks,
+#     AddNewTask,
+#     GetTaskByID,
+#     UpdateTaskByID,
+#     DeleteTaskByID
+# )
+# from services.user_service import Register, Authorization
+# from database import init_db
+
+# app = FastAPI()
+
+# @app.on_event("startup")
+# async def startup_event():
+#     await init_db()
+
+# @app.post('/login')
+# async def login(user: UserLogin):
+#     return await Authorization(user)
+
+# @app.post('/signin')
+# async def signin(user: UserAdd):
+#     return await Register(user)
+
+# @app.get('/tasks', dependencies=[Depends(get_current_user)])
+# async def get_all_tasks():
+#     return await GetAllTasks()
+
+# @app.post('/tasks', dependencies=[Depends(get_current_user)])
+# async def add_new_task(task: TaskAdd, current_user: User = Depends(get_current_user)):
+#     return await AddNewTask(task, current_user)
+
+# @app.get('/tasks/{task_id}', dependencies=[Depends(get_current_user)])
+# async def get_task_by_id(task_id: int, current_user: User = Depends(get_current_user)):
+#     return await GetTaskByID(task_id, current_user)
+
+# @app.put('/tasks/{task_id}', dependencies=[Depends(get_current_user)])
+# async def update_task_by_id(task_id: int, task_update: TaskUpdate, current_user: User = Depends(get_current_user)):
+#     return await UpdateTaskByID(task_id, task_update, current_user)
+
+# @app.delete('/tasks/{task_id}', dependencies=[Depends(get_current_user)])
+# async def delete_task_by_id(task_id: int, current_user: User = Depends(get_current_user)):
+#     return await DeleteTaskByID(task_id, current_user)
