@@ -1,177 +1,117 @@
---
--- PostgreSQL database dump
---
+-- Table: public.users
 
--- Dumped from database version 16.4
--- Dumped by pg_dump version 16.4
+-- DROP TABLE IF EXISTS public.users;
 
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
+CREATE TABLE IF NOT EXISTS public.users
+(
+    id integer NOT NULL DEFAULT nextval('users_id_seq'::regclass),
+    username character varying(60) COLLATE pg_catalog."default" NOT NULL,
+    email character varying(60) COLLATE pg_catalog."default" NOT NULL,
+    password character varying COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT users_pkey PRIMARY KEY (id)
+)
 
-SET default_tablespace = '';
+TABLESPACE pg_default;
 
-SET default_table_access_method = heap;
+ALTER TABLE IF EXISTS public.users
+    OWNER to postgres;
 
+-- Table: public.tasks
 
-CREATE TABLE public.facebook (
-    id integer NOT NULL,
-    url character varying NOT NULL,
-    username character varying NOT NULL,
-    bio character varying,
-    followers integer,
-    verified boolean,
-    task_id integer
-);
+-- DROP TABLE IF EXISTS public.tasks;
 
-ALTER TABLE public.facebook OWNER TO postgres;
-
-CREATE SEQUENCE public.facebook_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE public.facebook_id_seq OWNER TO postgres;
-
-ALTER SEQUENCE public.facebook_id_seq OWNED BY public.facebook.id;
-
-CREATE TABLE public.instagram (
-    id integer NOT NULL,
-    url character varying NOT NULL,
-    username character varying NOT NULL,
-    bio character varying,
-    followers integer,
-    verified boolean,
-    task_id integer
-);
-
-ALTER TABLE public.instagram OWNER TO postgres;
-
-CREATE SEQUENCE public.instagram_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE public.instagram_id_seq OWNER TO postgres;
-
-ALTER SEQUENCE public.instagram_id_seq OWNED BY public.instagram.id;
-
-CREATE TABLE public.tasks (
-    id integer NOT NULL,
-    title character varying(100) NOT NULL,
-    description character varying(1000),
+CREATE TABLE IF NOT EXISTS public.tasks
+(
+    id integer NOT NULL DEFAULT nextval('tasks_id_seq'::regclass),
+    title character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    description character varying(1000) COLLATE pg_catalog."default",
     completed boolean,
     created_at timestamp with time zone,
     updated_at timestamp with time zone,
-    user_id integer
-);
+    user_id integer,
+    CONSTRAINT tasks_pkey PRIMARY KEY (id),
+    CONSTRAINT tasks_user_id_fkey FOREIGN KEY (user_id)
+        REFERENCES public.users (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
 
-ALTER TABLE public.tasks OWNER TO postgres;
+TABLESPACE pg_default;
 
-CREATE SEQUENCE public.tasks_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+ALTER TABLE IF EXISTS public.tasks
+    OWNER to postgres;
 
-ALTER SEQUENCE public.tasks_id_seq OWNER TO postgres;
+-- Table: public.telegram
 
-ALTER SEQUENCE public.tasks_id_seq OWNED BY public.tasks.id;
+-- DROP TABLE IF EXISTS public.telegram;
 
-CREATE TABLE public.telegram (
-    id integer NOT NULL,
-    url character varying NOT NULL,
-    username character varying NOT NULL,
-    bio character varying,
+CREATE TABLE IF NOT EXISTS public.telegram
+(
+    id integer NOT NULL DEFAULT nextval('telegram_id_seq'::regclass),
+    url character varying COLLATE pg_catalog."default" NOT NULL,
+    username character varying COLLATE pg_catalog."default" NOT NULL,
+    bio character varying COLLATE pg_catalog."default",
     followers integer,
     verified boolean,
-    task_id integer
-);
+    task_id integer,
+    CONSTRAINT telegram_pkey PRIMARY KEY (id),
+    CONSTRAINT telegram_task_id_fkey FOREIGN KEY (task_id)
+        REFERENCES public.tasks (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
 
-ALTER TABLE public.telegram OWNER TO postgres;
+TABLESPACE pg_default;
 
-CREATE SEQUENCE public.telegram_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+ALTER TABLE IF EXISTS public.telegram
+    OWNER to postgres;
 
-ALTER SEQUENCE public.telegram_id_seq OWNER TO postgres;
+-- Table: public.instagram
 
-ALTER SEQUENCE public.telegram_id_seq OWNED BY public.telegram.id;
+-- DROP TABLE IF EXISTS public.instagram;
 
-CREATE TABLE public.users (
-    id integer NOT NULL,
-    username character varying(60) NOT NULL,
-    email character varying(60) NOT NULL,
-    password character varying NOT NULL
-);
+CREATE TABLE IF NOT EXISTS public.instagram
+(
+    id integer NOT NULL DEFAULT nextval('instagram_id_seq'::regclass),
+    url character varying COLLATE pg_catalog."default" NOT NULL,
+    username character varying COLLATE pg_catalog."default" NOT NULL,
+    bio character varying COLLATE pg_catalog."default",
+    followers integer,
+    verified boolean,
+    task_id integer,
+    CONSTRAINT instagram_pkey PRIMARY KEY (id),
+    CONSTRAINT instagram_task_id_fkey FOREIGN KEY (task_id)
+        REFERENCES public.tasks (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
 
-ALTER TABLE public.users OWNER TO postgres;
+TABLESPACE pg_default;
 
-CREATE SEQUENCE public.users_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
+ALTER TABLE IF EXISTS public.instagram
+    OWNER to postgres;
 
-ALTER SEQUENCE public.users_id_seq OWNER TO postgres;
+-- Table: public.facebook
 
-ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
+-- DROP TABLE IF EXISTS public.facebook;
 
-ALTER TABLE ONLY public.facebook ALTER COLUMN id SET DEFAULT nextval('public.facebook_id_seq'::regclass);
+CREATE TABLE IF NOT EXISTS public.facebook
+(
+    id integer NOT NULL DEFAULT nextval('facebook_id_seq'::regclass),
+    url character varying COLLATE pg_catalog."default" NOT NULL,
+    username character varying COLLATE pg_catalog."default" NOT NULL,
+    bio character varying COLLATE pg_catalog."default",
+    followers integer,
+    verified boolean,
+    task_id integer,
+    CONSTRAINT facebook_pkey PRIMARY KEY (id),
+    CONSTRAINT facebook_task_id_fkey FOREIGN KEY (task_id)
+        REFERENCES public.tasks (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
 
-ALTER TABLE ONLY public.instagram ALTER COLUMN id SET DEFAULT nextval('public.instagram_id_seq'::regclass);
+TABLESPACE pg_default;
 
-ALTER TABLE ONLY public.tasks ALTER COLUMN id SET DEFAULT nextval('public.tasks_id_seq'::regclass);
-
-ALTER TABLE ONLY public.telegram ALTER COLUMN id SET DEFAULT nextval('public.telegram_id_seq'::regclass);
-
-ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
-
-ALTER TABLE ONLY public.facebook
-    ADD CONSTRAINT facebook_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY public.instagram
-    ADD CONSTRAINT instagram_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY public.tasks
-    ADD CONSTRAINT tasks_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY public.telegram
-    ADD CONSTRAINT telegram_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY public.facebook
-    ADD CONSTRAINT facebook_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.tasks(id);
-
-ALTER TABLE ONLY public.instagram
-    ADD CONSTRAINT instagram_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.tasks(id);
-
-
-ALTER TABLE ONLY public.tasks
-    ADD CONSTRAINT tasks_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
-
-ALTER TABLE ONLY public.telegram
-    ADD CONSTRAINT telegram_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.tasks(id);
+ALTER TABLE IF EXISTS public.facebook
+    OWNER to postgres;
