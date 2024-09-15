@@ -7,6 +7,7 @@ from database.init_db import AsyncSessionLocal
 import jwt
 import re
 
+#TODO need to do one class AuthService, then initialize in app, and use in all chart of code
 def check_is_email(email: str):
     regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
     return re.fullmatch(regex, email)

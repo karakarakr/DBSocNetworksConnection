@@ -6,6 +6,7 @@ from sqlalchemy.future import select
 from services.auth_service import check_is_email, create_access_token
 import bcrypt
 
+#TODO need to do one class UserService, then initialize in app, and use in all chart of code
 async def Register(user: UserAdd):
     async with AsyncSessionLocal() as session:
         if check_is_email(user.email) is None:
