@@ -7,7 +7,6 @@ from sqlalchemy.future import select
 from services.auth_service import get_current_user
 from datetime import datetime, timezone
 
-#TODO need to do one class TaskService, then initialize in app, and use in all chart of code
 # Delete model from database
 async def delete_soc_network(socnet_models, session):
     if socnet_models is not None:
