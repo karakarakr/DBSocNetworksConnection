@@ -3,43 +3,48 @@ from data.config import UserAdd, UserLogin
 from database.init_db import AsyncSessionLocal
 from database.orm_models import User
 from sqlalchemy.future import select
-from services.auth_service import check_is_email, create_access_token
+
+from services.auth_service import auth_services
+
 import bcrypt
 
-#TODO need to do one class UserService, then initialize in app, and use in all chart of code
-async def Register(user: UserAdd):
-    async with AsyncSessionLocal() as session:
-        if check_is_email(user.email) is None:
-            raise HTTPException(status_code=400, detail=f'{user.email} is not a valid email!')
+#TODO need to do one class UserServices, then initialize in app, and use in all chart of code
+class UserServices:
 
-        hashed_password = bcrypt.hashpw(
-            str.encode(user.password),
-            bcrypt.gensalt()
-        ).decode('utf-8')
+    async def Register(self, user: UserAdd):
+        async with AsyncSessionLocal() as session:
+            if auth_services.check_is_email(user.email) is None:
+                raise HTTPException(status_code=400, detail=f'{user.email} is not a valid email!')
 
-        # Create DB model
-        db_user = User(
-            username=user.username,
-            email=user.email,
-            password=hashed_password
-        )
+            hashed_password = bcrypt.hashpw(
+                str.encode(user.password),
+                bcrypt.gensalt()
+            ).decode('utf-8')
 
-        # Write DB model into the database
-        session.add(db_user)
-        await session.commit()
+            # Create DB model
+            db_user = User(
+                username=user.username,
+                email=user.email,
+                password=hashed_password
+            )
 
-    return {'message': 'User was added successfully!', 'user': user}
+            # Write DB model into the database
+            session.add(db_user)
+            await session.commit()
 
-async def Authorization(user: UserLogin):
-    async with AsyncSessionLocal() as session:
+        return {'message': 'User was added successfully!', 'user': user}
 
-        # Hash password using bcrypt library to compare user passwords
-        byte_pswd = str.encode(user.password)
-        result = await session.execute(select(User).filter_by(email=user.email))
-        db_user = result.scalars().first()
+    async def Authorization(self, user: UserLogin):
+        async with AsyncSessionLocal() as session:
 
-        if db_user is None or not bcrypt.checkpw(byte_pswd, db_user.password.encode('utf-8')):
-            raise HTTPException(status_code=401, detail="Invalid email or password")
+            # Hash password using bcrypt library to compare user passwords
+            byte_pswd = str.encode(user.password)
+            result = await session.execute(select(User).filter_by(email=user.email))
+            db_user = result.scalars().first()
 
-        access_token = create_access_token(data={"sub": db_user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+            if db_user is None or not bcrypt.checkpw(byte_pswd, db_user.password.encode('utf-8')):
+                raise HTTPException(status_code=401, detail="Invalid email or password")
+
+            access_token = auth_services.create_access_token(data={"sub": db_user.email})
+
+        return {"access_token": access_token, "token_type": "bearer"}

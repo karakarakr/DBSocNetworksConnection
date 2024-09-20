@@ -1,14 +1,14 @@
 from fastapi import APIRouter
 
 from data.config import UserAdd, UserLogin
-from services.user_service import Register, Authorization
+from app.init_services import user_services
 
 router = APIRouter()
 
 @router.post('/login')
 async def login(user: UserLogin):
-    return await Authorization(user)
+    return await user_services.Authorization(user)
 
 @router.post('/signin')
 async def signin(user: UserAdd):
-    return await Register(user)
+    return await user_services.Register(user)

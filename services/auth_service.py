@@ -8,39 +8,44 @@ import jwt
 import re
 
 #TODO need to do one class AuthService, then initialize in app, and use in all chart of code
-def check_is_email(email: str):
-    regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
-    return re.fullmatch(regex, email)
+# ІНІЦІАЛІЗУВАТИ КЛАСИ В АРР !!!!!!
+class AuthServices:
 
-def create_access_token(data: dict, expires_delta: timedelta = timedelta(minutes=15)):
-    to_encode = data.copy()
+    def check_is_email(self, email: str):
+        regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+        return re.fullmatch(regex, email)
 
-    expire = datetime.now(timezone.utc) + expires_delta
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    def create_access_token(self, data: dict, expires_delta: timedelta = timedelta(minutes=15)):
+        to_encode = data.copy()
 
-    return encoded_jwt
+        expire = datetime.now(timezone.utc) + expires_delta
+        to_encode.update({"exp": expire})
+        encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-def verify_token(token: str):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token has expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        return encoded_jwt
 
-async def get_current_user(token: str = Header(...)):
-    async with AsyncSessionLocal() as session:
-        payload = verify_token(token)
-        user_email = payload.get("sub")
-        if user_email is None:
-            raise HTTPException(status_code=401, detail="Could not validate credentials")
+    def verify_token(self, token: str):
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            return payload
+        except jwt.ExpiredSignatureError:
+            raise HTTPException(status_code=401, detail="Token has expired")
+        except jwt.InvalidTokenError:
+            raise HTTPException(status_code=401, detail="Invalid token")
 
-        result = await session.execute(select(User).filter_by(email=user_email))
-        db_user = result.scalars().first()
+    async def get_current_user(self, token: str = Header(...)):
+        async with AsyncSessionLocal() as session:
+            payload = self.verify_token(token)
+            user_email = payload.get("sub")
+            if user_email is None:
+                raise HTTPException(status_code=401, detail="Could not validate credentials")
 
-        if db_user is None:
-            raise HTTPException(status_code=401, detail="User not found")
+            result = await session.execute(select(User).filter_by(email=user_email))
+            db_user = result.scalars().first()
 
-    return db_user
+            if db_user is None:
+                raise HTTPException(status_code=401, detail="User not found")
+
+        return db_user
+
+auth_services = AuthServices()
