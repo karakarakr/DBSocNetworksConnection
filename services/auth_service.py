@@ -7,8 +7,6 @@ from database.init_db import AsyncSessionLocal
 import jwt
 import re
 
-#TODO need to do one class AuthService, then initialize in app, and use in all chart of code
-# ІНІЦІАЛІЗУВАТИ КЛАСИ В АРР !!!!!!
 class AuthServices:
 
     def check_is_email(self, email: str):
